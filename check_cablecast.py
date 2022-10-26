@@ -51,13 +51,18 @@ def check_autopilot_send_end(host, location):
    mylogger.debug("Requesting stats from : %s" % target)
    try:
       response = urllib.urlopen(target)
-      data = json.loads(response.read())
    except Exception as e:
       mylogger.critical("error while requesting stats.  error=%s" % e)
       sys.exit(UNKNOWN)
 
+   try:
+      data = json.loads(response.read())['autopilotSend']
+   except Exce as e:
+      mylogger.critical("error while parsing stats.  Incorrect cablecast version?  error=%s" % e)
+      sys.exit(UNKNOWN)
+
    scheduleModified = data['scheduleModified']
-   sendTo = iso8601.parse_date(data['lastSendTo'])
+   sendTo = iso8601.parse_date(data['end'])
    now = datetime.datetime.now(get_localzone())
    sendTimeRemaining = sendTo - now
 
